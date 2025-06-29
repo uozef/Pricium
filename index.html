@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricium - PARAX Price Predictions</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+            backdrop-filter: blur(5px);
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 5px;
+        }
+
+        .timeframe-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .timeframe-btn {
+            padding: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: transparent;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .timeframe-btn.active {
+            border-color: #4ecdc4;
+            background: rgba(78, 205, 196, 0.2);
+        }
+
+        .current-price {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .price {
+            font-size: 28px;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            height: 250px;
+        }
+
+        .prediction-result {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .prediction-price {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }
+
+        .prediction-change {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .positive {
+            color: #4ecdc4;
+        }
+
+        .negative {
+            color: #ff6b6b;
+        }
+
+        .accuracy-badge {
+            display: inline-block;
+            background: rgba(78, 205, 196, 0.3);
+            color: #4ecdc4;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .referral-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .referral-code {
+            font-family: monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: #4ecdc4;
+            text-align: center;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .error {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 5px;
+            margin-bottom: 20px;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .nav-tab.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: #4ecdc4;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #4ecdc4;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Referral Code Entry Screen -->
+        <div id="referralScreen" class="screen active">
+            <div class="header">
+                <div class="logo">Pricium</div>
+                <div class="subtitle">PARAX Price Predictions</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="referralInput">Enter Referral Code to Continue</label>
+                <input type="text" id="referralInput" placeholder="REF123456" maxlength="9">
+                <div id="referralError" class="error" style="display: none;">Invalid referral code</div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="validateReferral()">Continue</button>
+            
+            <div style="text-align: center; margin-top: 20px; color: rgba(255, 255, 255, 0.7); font-size: 14px;">
+                Don't have a referral code? Ask a friend to share theirs!
+            </div>
+        </div>
+
+        <!-- Main App Screen -->
+        <div id="mainScreen" class="screen">
+            <div class="header">
+                <div class="logo">Pricium</div>
+                <div class="subtitle">PARAX Price Predictions</div>
+            </div>
+
+            <div class="nav-tabs">
+                <div class="nav-tab active" onclick="showTab('predict')">Predict</div>
+                <div class="nav-tab" onclick="showTab('referral')">Referral</div>
+            </div>
+
+            <!-- Predict Tab -->
+            <div id="predictTab" class="tab-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="creditsCount">10</div>
+                        <div class="stat-label">Credits Left</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">87%</div>
+                        <div class="stat-label">Accuracy</div>
+                    </div>
+                </div>
+
+                <div class="current-price">
+                    <div style="font-size: 14px; color: rgba(255, 255, 255, 0.7); margin-bottom: 5px;">PARAX Current Price</div>
+                    <div class="price">$2.45</div>
+                    <div style="font-size: 12px; color: #4ecdc4; margin-top: 5px;">+5.23% (24h)</div>
+                </div>
+
+                <div class="input-group">
+                    <label>Select Prediction Timeframe</label>
+                    <div class="timeframe-grid">
+                        <button class="timeframe-btn active" onclick="selectTimeframe(this, '1h')">Next Hour</button>
+                        <button class="timeframe-btn" onclick="selectTimeframe(this, '1d')">Today</button>
+                        <button class="timeframe-btn" onclick="selectTimeframe(this, '1w')">Next Week</button>
+                        <button class="timeframe-btn" onclick="selectTimeframe(this, '1m')">Next Month</button>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="makePrediction()">Get Prediction (1 Credit)</button>
+
+                <div id="predictionResult" style="display: none;">
+                    <div class="prediction-result">
+                        <div class="prediction-price" id="predictedPrice">$2.78</div>
+                        <div class="prediction-change" id="predictedChange">+13.47% ↗</div>
+                        <div class="accuracy-badge">87% Historical Accuracy</div>
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="priceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Referral Tab -->
+            <div id="referralTab" class="tab-content" style="display: none;">
+                <div class="referral-section">
+                    <h3 style="text-align: center; margin-bottom: 15px;">Your Referral Code</h3>
+                    <div class="referral-code" id="userReferralCode">REF789123</div>
+                    <button class="btn btn-secondary" onclick="shareReferral()">Share Code</button>
+                    <div style="text-align: center; margin-top: 15px; font-size: 14px; color: rgba(255, 255, 255, 0.7);">
+                        Each friend who joins gives you <strong>+5 credits</strong>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">3</div>
+                        <div class="stat-label">Referrals</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">+15</div>
+                        <div class="stat-label">Bonus Credits</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Screen -->
+        <div id="loadingScreen" class="screen">
+            <div class="loading">
+                <div class="spinner"></div>
+                <div>Analyzing market data...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userCredits = 10;
+        let currentTimeframe = '1h';
+        let priceChart = null;
+
+        // Mock data for demonstration
+        const historicalPrices = [2.10, 2.15, 2.08, 2.22, 2.18, 2.35, 2.41, 2.45];
+        const currentPrice = 2.45;
+
+        function validateReferral() {
+            const referralCode = document.getElementById('referralInput').value.trim();
+            const errorDiv = document.getElementById('referralError');
+            
+            // Simple validation - in real app, this would be server-side
+            if (referralCode.length >= 6 && referralCode.toUpperCase().startsWith('REF')) {
+                showScreen('mainScreen');
+                errorDiv.style.display = 'none';
+            } else {
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function showTab(tabName) {
+            // Update nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Show tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById(tabName + 'Tab').style.display = 'block';
+        }
+
+        function selectTimeframe(button, timeframe) {
+            document.querySelectorAll('.timeframe-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+            currentTimeframe = timeframe;
+        }
+
+        function makePrediction() {
+            if (userCredits <= 0) {
+                alert('No credits remaining! Invite friends to get more.');
+                return;
+            }
+
+            showScreen('loadingScreen');
+            
+            setTimeout(() => {
+                userCredits--;
+                document.getElementById('creditsCount').textContent = userCredits;
+                
+                // Generate prediction based on timeframe
+                const predictions = {
+                    '1h': { price: 2.52, change: 2.86 },
+                    '1d': { price: 2.78, change: 13.47 },
+                    '1w': { price: 3.12, change: 27.35 },
+                    '1m': { price: 2.89, change: 17.96 }
+                };
+                
+                const prediction = predictions[currentTimeframe];
+                const isPositive = prediction.change > 0;
+                
+                document.getElementById('predictedPrice').textContent = `$${prediction.price.toFixed(2)}`;
+                document.getElementById('predictedChange').textContent = 
+                    `${isPositive ? '+' : ''}${prediction.change.toFixed(2)}% ${isPositive ? '↗' : '↘'}`;
+                document.getElementById('predictedChange').className = 
+                    `prediction-change ${isPositive ? 'positive' : 'negative'}`;
+                
+                document.getElementById('predictionResult').style.display = 'block';
+                
+                createPriceChart(prediction.price);
+                showScreen('mainScreen');
+            }, 2000);
+        }
+
+        function createPriceChart(targetPrice) {
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            
+            if (priceChart) {
+                priceChart.destroy();
+            }
+
+            const labels = ['7d ago', '6d ago', '5d ago', '4d ago', '3d ago', '2d ago', '1d ago', 'Now', 'Target'];
+            const historicalData = [...historicalPrices, targetPrice];
+            
+            priceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Historical Price',
+                        data: historicalPrices.concat([currentPrice]),
+                        borderColor: '#4ecdc4',
+                        backgroundColor: 'rgba(78, 205, 196, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        pointBackgroundColor: '#4ecdc4',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5
+                    }, {
+                        label: 'Prediction',
+                        data: new Array(historicalPrices.length).fill(null).concat([currentPrice, targetPrice]),
+                        borderColor: '#ff6b6b',
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        borderDash: [10, 5],
+                        pointBackgroundColor: '#ff6b6b',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white',
+                                usePointStyle: true
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: 'rgba(255, 255, 255, 0.8)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y: {
+                            ticks: { 
+                                color: 'rgba(255, 255, 255, 0.8)',
+                                callback: function(value) {
+                                    return '$' + value.toFixed(2);
+                                }
+                            },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    },
+                    elements: {
+                        point: {
+                            hoverRadius: 8
+                        }
+                    }
+                }
+            });
+        }
+
+        function shareReferral() {
+            const referralCode = document.getElementById('userReferralCode').textContent;
+            const shareText = `Join me on Pricium for PARAX price predictions! Use my referral code: ${referralCode}`;
+            
+            // Use Telegram WebApp API if available, otherwise fallback to clipboard
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.sendData(JSON.stringify({
+                    action: 'share_referral',
+                    code: referralCode,
+                    text: shareText
+                }));
+            } else {
+                // Fallback to clipboard copy
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert('Referral code copied to clipboard!');
+                }).catch(() => {
+                    alert(`Share this code: ${referralCode}`);
+                });
+            }
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-focus referral input
+            document.getElementById('referralInput').focus();
+            
+            // Allow Enter key to submit referral
+            document.getElementById('referralInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    validateReferral();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
