@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pricium - PARAX Price Predictions</title>
+    <title>AI Powered Price Predicting Agent</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         * {
@@ -14,7 +14,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3a 50%, #2d1b69 100%);
             color: white;
             min-height: 100vh;
             padding: 20px;
@@ -23,11 +23,12 @@
         .container {
             max-width: 400px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 255, 255, 0.2);
             border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 255, 255, 0.1);
         }
 
         .header {
@@ -38,7 +39,7 @@
         .logo {
             font-size: 32px;
             font-weight: bold;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #00ff00);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 5px;
@@ -71,22 +72,22 @@
         .input-group input, .input-group select {
             width: 100%;
             padding: 15px;
-            border: none;
+            border: 2px solid rgba(0, 255, 255, 0.3);
             border-radius: 12px;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.4);
             color: white;
             font-size: 16px;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
         }
 
         .input-group input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(0, 255, 255, 0.7);
         }
 
         .input-group input:focus, .input-group select:focus {
             outline: none;
-            background: rgba(255, 255, 255, 0.25);
-            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.6);
+            border-color: #00ffff;
         }
 
         .btn {
@@ -102,23 +103,24 @@
         }
 
         .btn-primary {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            background: linear-gradient(45deg, #ff0080, #8000ff, #0080ff);
             color: white;
+            border: 2px solid rgba(255, 0, 128, 0.5);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+            background: linear-gradient(45deg, #ff0099, #9900ff, #0099ff);
         }
 
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(0, 255, 255, 0.1);
+            color: #00ffff;
+            border: 2px solid rgba(0, 255, 255, 0.5);
         }
 
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(0, 255, 255, 0.2);
         }
 
         .stats-grid {
@@ -129,7 +131,8 @@
         }
 
         .stat-card {
-            background: rgba(255, 255, 255, 0.15);
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border: 1px solid rgba(0, 255, 255, 0.3);
             padding: 20px;
             border-radius: 12px;
             text-align: center;
@@ -138,7 +141,7 @@
         .stat-value {
             font-size: 24px;
             font-weight: bold;
-            color: #4ecdc4;
+            color: #00ff88;
         }
 
         .stat-label {
@@ -156,22 +159,24 @@
 
         .timeframe-btn {
             padding: 12px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(0, 255, 255, 0.5);
             border-radius: 10px;
-            background: transparent;
-            color: white;
+            background: rgba(0, 0, 0, 0.3);
+            color: #00ffff;
             font-size: 14px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
         .timeframe-btn.active {
-            border-color: #4ecdc4;
-            background: rgba(78, 205, 196, 0.2);
+            border-color: #00ff88;
+            background: linear-gradient(45deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 255, 0.2));
+            color: #00ff88;
         }
 
         .current-price {
-            background: rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 255, 255, 0.1));
+            border: 1px solid rgba(0, 255, 136, 0.3);
             padding: 20px;
             border-radius: 12px;
             text-align: center;
@@ -181,11 +186,12 @@
         .price {
             font-size: 28px;
             font-weight: bold;
-            color: #4ecdc4;
+            color: #00ff88;
         }
 
         .chart-container {
-            background: rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(0, 255, 255, 0.05));
+            border: 1px solid rgba(0, 255, 255, 0.3);
             padding: 15px;
             border-radius: 12px;
             margin-bottom: 20px;
@@ -193,7 +199,8 @@
         }
 
         .prediction-result {
-            background: rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.1), rgba(0, 255, 255, 0.1));
+            border: 1px solid rgba(255, 0, 255, 0.3);
             padding: 20px;
             border-radius: 12px;
             text-align: center;
@@ -203,7 +210,7 @@
         .prediction-price {
             font-size: 32px;
             font-weight: bold;
-            color: #ff6b6b;
+            color: #ff0080;
             margin-bottom: 10px;
         }
 
@@ -213,17 +220,18 @@
         }
 
         .positive {
-            color: #4ecdc4;
+            color: #00ff88;
         }
 
         .negative {
-            color: #ff6b6b;
+            color: #ff0080;
         }
 
         .accuracy-badge {
             display: inline-block;
-            background: rgba(78, 205, 196, 0.3);
-            color: #4ecdc4;
+            background: linear-gradient(45deg, rgba(0, 255, 136, 0.3), rgba(0, 255, 255, 0.3));
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.5);
             padding: 5px 12px;
             border-radius: 20px;
             font-size: 12px;
@@ -231,7 +239,8 @@
         }
 
         .referral-section {
-            background: rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border: 1px solid rgba(0, 255, 255, 0.3);
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 20px;
@@ -241,23 +250,25 @@
             font-family: monospace;
             font-size: 18px;
             font-weight: bold;
-            color: #4ecdc4;
+            color: #00ffff;
             text-align: center;
             padding: 10px;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 255, 255, 0.5);
             border-radius: 8px;
             margin: 10px 0;
         }
 
         .error {
-            color: #ff6b6b;
+            color: #ff0080;
             font-size: 14px;
             margin-top: 10px;
         }
 
         .nav-tabs {
             display: flex;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 255, 255, 0.3);
             border-radius: 12px;
             padding: 5px;
             margin-bottom: 20px;
@@ -271,11 +282,12 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 14px;
+            color: #00ffff;
         }
 
         .nav-tab.active {
-            background: rgba(255, 255, 255, 0.2);
-            color: #4ecdc4;
+            background: linear-gradient(45deg, rgba(0, 255, 136, 0.3), rgba(0, 255, 255, 0.3));
+            color: #00ff88;
         }
 
         .loading {
@@ -284,9 +296,9 @@
         }
 
         .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.3);
+            border: 3px solid rgba(0, 255, 255, 0.3);
             border-radius: 50%;
-            border-top: 3px solid #4ecdc4;
+            border-top: 3px solid #00ffff;
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
@@ -304,8 +316,8 @@
         <!-- Referral Code Entry Screen -->
         <div id="referralScreen" class="screen active">
             <div class="header">
-                <div class="logo">Pricium</div>
-                <div class="subtitle">PARAX Price Predictions</div>
+                <div class="logo">AI Powered Price Predicting Agent</div>
+                <div class="subtitle">AI Powered Price Prediction Engine</div>
             </div>
             
             <div class="input-group">
@@ -324,8 +336,8 @@
         <!-- Main App Screen -->
         <div id="mainScreen" class="screen">
             <div class="header">
-                <div class="logo">Pricium</div>
-                <div class="subtitle">PARAX Price Predictions</div>
+                <div class="logo">AI Powered Price Predicting Agent</div>
+                <div class="subtitle">AI Powered Price Prediction Engine</div>
             </div>
 
             <div class="nav-tabs">
@@ -342,7 +354,7 @@
                     </div>
                     <div class="stat-card">
                         <div class="stat-value">87%</div>
-                        <div class="stat-label">Accuracy</div>
+                        <div class="stat-label">Historical Prediction Accuracy</div>
                     </div>
                 </div>
 
@@ -365,14 +377,14 @@
                 <button class="btn btn-primary" onclick="makePrediction()">Get Prediction (1 Credit)</button>
 
                 <div id="predictionResult" style="display: none;">
+                    <div class="chart-container">
+                        <canvas id="priceChart"></canvas>
+                    </div>
+
                     <div class="prediction-result">
                         <div class="prediction-price" id="predictedPrice">$2.78</div>
                         <div class="prediction-change" id="predictedChange">+13.47% ↗</div>
-                        <div class="accuracy-badge">87% Historical Accuracy</div>
-                    </div>
-
-                    <div class="chart-container">
-                        <canvas id="priceChart"></canvas>
+                        <div class="accuracy-badge">87% Historical Prediction Accuracy</div>
                     </div>
                 </div>
             </div>
@@ -514,22 +526,22 @@
                     datasets: [{
                         label: 'Historical Price',
                         data: historicalPrices.concat([currentPrice]),
-                        borderColor: '#4ecdc4',
-                        backgroundColor: 'rgba(78, 205, 196, 0.1)',
+                        borderColor: '#00ff88',
+                        backgroundColor: 'rgba(0, 255, 136, 0.1)',
                         borderWidth: 3,
                         fill: true,
-                        pointBackgroundColor: '#4ecdc4',
+                        pointBackgroundColor: '#00ff88',
                         pointBorderColor: '#ffffff',
                         pointBorderWidth: 2,
                         pointRadius: 5
                     }, {
                         label: 'Prediction',
                         data: new Array(historicalPrices.length).fill(null).concat([currentPrice, targetPrice]),
-                        borderColor: '#ff6b6b',
+                        borderColor: '#ff0080',
                         backgroundColor: 'transparent',
                         borderWidth: 3,
                         borderDash: [10, 5],
-                        pointBackgroundColor: '#ff6b6b',
+                        pointBackgroundColor: '#ff0080',
                         pointBorderColor: '#ffffff',
                         pointBorderWidth: 2,
                         pointRadius: 6
@@ -572,7 +584,7 @@
 
         function shareReferral() {
             const referralCode = document.getElementById('userReferralCode').textContent;
-            const shareText = `Join me on Pricium for PARAX price predictions! Use my referral code: ${referralCode}`;
+            const shareText = `Join me on AI Powered Price Predicting Agent for PARAX price predictions! Use my referral code: ${referralCode}`;
             
             // Use Telegram WebApp API if available, otherwise fallback to clipboard
             if (window.Telegram && window.Telegram.WebApp) {
