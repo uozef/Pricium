@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Powered Price Predicting Agent</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <title>Pricium - PARAX Predictions</title>
     <style>
         * {
             margin: 0;
@@ -14,21 +13,31 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3a 50%, #2d1b69 100%);
-            color: white;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
             min-height: 100vh;
-            padding: 20px;
+            color: #fff;
+            overflow-x: hidden;
         }
 
         .container {
             max-width: 400px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 8px 32px rgba(0, 255, 255, 0.1);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .header {
@@ -37,584 +46,1081 @@
         }
 
         .logo {
-            font-size: 32px;
+            font-size: 2.5rem;
             font-weight: bold;
-            background: linear-gradient(45deg, #00ffff, #ff00ff, #00ff00);
+            background: linear-gradient(45deg, #FFD700, #FFA500);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
         }
 
         .subtitle {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 14px;
-        }
-
-        .screen {
-            display: none;
-        }
-
-        .screen.active {
-            display: block;
-        }
-
-        .input-group {
+            font-size: 0.9rem;
+            opacity: 0.8;
             margin-bottom: 20px;
         }
 
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: rgba(255, 255, 255, 0.9);
-            font-weight: 500;
-        }
-
-        .input-group input, .input-group select {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid rgba(0, 255, 255, 0.3);
-            border-radius: 12px;
-            background: rgba(0, 0, 0, 0.4);
-            color: white;
-            font-size: 16px;
+        .credits-display {
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .input-group input::placeholder {
-            color: rgba(0, 255, 255, 0.7);
+        .credits-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #FFD700;
         }
 
-        .input-group input:focus, .input-group select:focus {
-            outline: none;
-            background: rgba(0, 0, 0, 0.6);
-            border-color: #00ffff;
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .prediction-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .prediction-option:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .prediction-option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .prediction-option.disabled:hover {
+            transform: none;
+        }
+
+        .prediction-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .prediction-info p {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .prediction-cost {
+            background: #FFD700;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8rem;
         }
 
         .btn {
             width: 100%;
             padding: 15px;
             border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .btn-primary {
-            background: linear-gradient(45deg, #ff0080, #8000ff, #0080ff);
-            color: white;
-            border: 2px solid rgba(255, 0, 128, 0.5);
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #333;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            background: linear-gradient(45deg, #ff0099, #9900ff, #0099ff);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
         }
 
         .btn-secondary {
-            background: rgba(0, 255, 255, 0.1);
-            color: #00ffff;
-            border: 2px solid rgba(0, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .btn-secondary:hover {
-            background: rgba(0, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.2);
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
-        .stat-card {
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            padding: 20px;
-            border-radius: 12px;
+        .btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .welcome-screen {
             text-align: center;
         }
 
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #00ff88;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.7);
-            margin-top: 5px;
-        }
-
-        .timeframe-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+        .welcome-icon {
+            font-size: 4rem;
             margin-bottom: 20px;
         }
 
-        .timeframe-btn {
-            padding: 12px;
-            border: 2px solid rgba(0, 255, 255, 0.5);
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.3);
-            color: #00ffff;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .timeframe-btn.active {
-            border-color: #00ff88;
-            background: linear-gradient(45deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 255, 0.2));
-            color: #00ff88;
-        }
-
-        .current-price {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 255, 255, 0.1));
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .price {
-            font-size: 28px;
-            font-weight: bold;
-            color: #00ff88;
-        }
-
-        .chart-container {
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(0, 255, 255, 0.05));
-            border: 1px solid rgba(0, 255, 255, 0.3);
+        .referral-code-input {
+            width: 100%;
             padding: 15px;
-            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 1rem;
             margin-bottom: 20px;
-            height: 250px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .referral-code-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .referral-code-input:focus {
+            outline: none;
+            border-color: rgba(255, 215, 0, 0.5);
+            background: rgba(255, 255, 255, 0.08);
         }
 
         .prediction-result {
-            background: linear-gradient(135deg, rgba(255, 0, 255, 0.1), rgba(0, 255, 255, 0.1));
-            border: 1px solid rgba(255, 0, 255, 0.3);
-            padding: 20px;
-            border-radius: 12px;
             text-align: center;
-            margin-bottom: 20px;
+            padding: 20px;
         }
 
         .prediction-price {
-            font-size: 32px;
+            font-size: 2.5rem;
             font-weight: bold;
-            color: #ff0080;
-            margin-bottom: 10px;
+            color: #4CAF50;
+            margin: 20px 0;
         }
 
         .prediction-change {
-            font-size: 18px;
-            margin-bottom: 10px;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
         }
 
-        .positive {
-            color: #00ff88;
+        .positive { color: #4CAF50; }
+        .negative { color: #f44336; }
+
+        .referral-section {
+            text-align: center;
         }
 
-        .negative {
-            color: #ff0080;
+        .referral-code-display {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+
+        .tab-nav {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: rgba(255, 215, 0, 0.2);
+            color: #FFD700;
         }
 
         .accuracy-badge {
-            display: inline-block;
-            background: linear-gradient(45deg, rgba(0, 255, 136, 0.3), rgba(0, 255, 255, 0.3));
-            color: #00ff88;
-            border: 1px solid rgba(0, 255, 136, 0.5);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .referral-section {
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            padding: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 2px 8px;
             border-radius: 12px;
-            margin-bottom: 20px;
+            font-size: 0.7rem;
+            margin-left: 5px;
         }
 
-        .referral-code {
-            font-family: monospace;
-            font-size: 18px;
-            font-weight: bold;
-            color: #00ffff;
-            text-align: center;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(0, 255, 255, 0.5);
-            border-radius: 8px;
-            margin: 10px 0;
-        }
-
-        .error {
-            color: #ff0080;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-
-        .nav-tabs {
+        .holdings-status {
             display: flex;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            border-radius: 12px;
-            padding: 5px;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
             margin-bottom: 20px;
         }
 
-        .nav-tab {
+        .holdings-verified {
+            color: #4CAF50;
+        }
+
+        .holdings-unverified {
+            color: #ff9800;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 20px 20px 0 0;
+            padding: 15px;
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-btn {
             flex: 1;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
             padding: 10px;
-            text-align: center;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 14px;
-            color: #00ffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
         }
 
-        .nav-tab.active {
-            background: linear-gradient(45deg, rgba(0, 255, 136, 0.3), rgba(0, 255, 255, 0.3));
-            color: #00ff88;
+        .nav-btn.active {
+            color: #FFD700;
+            background: rgba(255, 215, 0, 0.1);
         }
 
-        .loading {
+        .nav-icon {
+            font-size: 1.2rem;
+        }
+
+        .prediction-history {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .prediction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .price-header {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .current-price {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .price-info h2 {
+            font-size: 1.8rem;
+            color: #FFD700;
+            margin-bottom: 5px;
+        }
+
+        .price-change-24h {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .chart-container {
+            height: 120px;
+            position: relative;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        .price-chart {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .chart-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right,
+                transparent 0%,
+                rgba(76, 175, 80, 0.1) 20%,
+                rgba(76, 175, 80, 0.2) 50%,
+                rgba(76, 175, 80, 0.3) 80%,
+                rgba(76, 175, 80, 0.4) 100%
+            );
+            clip-path: polygon(
+                0% 100%, 5% 85%, 15% 75%, 25% 82%, 35% 70%, 
+                45% 65%, 55% 72%, 65% 60%, 75% 55%, 85% 45%, 95% 40%, 100% 35%, 
+                100% 100%
+            );
+            animation: chartGrow 2s ease-out;
+        }
+
+        @keyframes chartGrow {
+            from { clip-path: polygon(0% 100%, 0% 100%, 0% 100%); }
+            to { clip-path: polygon(
+                0% 100%, 5% 85%, 15% 75%, 25% 82%, 35% 70%, 
+                45% 65%, 55% 72%, 65% 60%, 75% 55%, 85% 45%, 95% 40%, 100% 35%, 
+                100% 100%
+            ); }
+        }
+
+        .chart-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .market-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
             text-align: center;
-            padding: 40px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .spinner {
-            border: 3px solid rgba(0, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top: 3px solid #00ffff;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #FFD700;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .stat-label {
+            font-size: 0.7rem;
+            opacity: 0.6;
+            margin-top: 2px;
         }
+
+        .user-demand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .demand-indicator {
+            background: rgba(255, 215, 0, 0.2);
+            color: #FFD700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .accuracy-trend {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .trend-arrow {
+            font-size: 0.8rem;
+        }
+
+        .trend-up { color: #4CAF50; }
+        .trend-down { color: #f44336; }
+        .trend-stable { color: #ff9800; }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Referral Code Entry Screen -->
-        <div id="referralScreen" class="screen active">
-            <div class="header">
-                <div class="logo">AI Powered Price Predicting Agent</div>
-                <div class="subtitle">AI Powered Price Prediction Engine</div>
-            </div>
-            
-            <div class="input-group">
-                <label for="referralInput">Enter Referral Code to Continue</label>
-                <input type="text" id="referralInput" placeholder="REF123456" maxlength="9">
-                <div id="referralError" class="error" style="display: none;">Invalid referral code</div>
-            </div>
-            
-            <button class="btn btn-primary" onclick="validateReferral()">Continue</button>
-            
-            <div style="text-align: center; margin-top: 20px; color: rgba(255, 255, 255, 0.7); font-size: 14px;">
-                Don't have a referral code? Ask a friend to share theirs!
+        <!-- Welcome Screen -->
+        <div class="screen active" id="welcome-screen">
+            <div class="welcome-screen">
+                <div class="header">
+                    <div class="logo">📊 Pricium</div>
+                    <div class="subtitle">AI-Powered PARAX Predictions</div>
+                </div>
+                
+                <div class="welcome-icon">🚀</div>
+                <h2>Welcome to Pricium!</h2>
+                <p style="margin: 20px 0; opacity: 0.8;">Get high-accuracy PARAX price predictions and earn credits by inviting friends!</p>
+                
+                <div class="card">
+                    <h3>🎁 Welcome Bonus</h3>
+                    <p style="margin: 10px 0;">You'll receive <strong>10 FREE credits</strong> to start predicting!</p>
+                </div>
+                
+                <input type="text" class="referral-code-input" placeholder="Enter Referral Code" id="referralInput">
+                <button class="btn btn-primary" onclick="joinWithReferral()">Join Pricium</button>
             </div>
         </div>
 
-        <!-- Main App Screen -->
-        <div id="mainScreen" class="screen">
+        <!-- Main Dashboard -->
+        <div class="screen" id="dashboard-screen">
             <div class="header">
-                <div class="logo">AI Powered Price Predicting Agent</div>
-                <div class="subtitle">AI Powered Price Prediction Engine</div>
+                <div class="logo">📊 Pricium</div>
+                <div class="subtitle">PARAX Price Predictions</div>
             </div>
 
-            <div class="nav-tabs">
-                <div class="nav-tab active" onclick="showTab('predict')">Predict</div>
-                <div class="nav-tab" onclick="showTab('referral')">Referral</div>
-            </div>
-
-            <!-- Predict Tab -->
-            <div id="predictTab" class="tab-content">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="creditsCount">10</div>
-                        <div class="stat-label">Credits Left</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">87%</div>
-                        <div class="stat-label">Historical Prediction Accuracy</div>
-                    </div>
-                </div>
-
+            <div class="price-header">
                 <div class="current-price">
-                    <div style="font-size: 14px; color: rgba(255, 255, 255, 0.7); margin-bottom: 5px;">PARAX Current Price</div>
-                    <div class="price">$2.45</div>
-                    <div style="font-size: 12px; color: #4ecdc4; margin-top: 5px;">+5.23% (24h)</div>
-                </div>
-
-                <div class="input-group">
-                    <label>Select Prediction Timeframe</label>
-                    <div class="timeframe-grid">
-                        <button class="timeframe-btn active" onclick="selectTimeframe(this, '1h')">Next Hour</button>
-                        <button class="timeframe-btn" onclick="selectTimeframe(this, '1d')">Today</button>
-                        <button class="timeframe-btn" onclick="selectTimeframe(this, '1w')">Next Week</button>
-                        <button class="timeframe-btn" onclick="selectTimeframe(this, '1m')">Next Month</button>
+                    <div class="price-info">
+                        <h2 id="currentPrice">$0.0218</h2>
+                        <div class="price-change-24h positive" id="priceChange24h">+8.4% (24h)</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.8rem; opacity: 0.6;">PARAX/USD</div>
+                        <div style="font-size: 0.8rem; opacity: 0.6;" id="lastUpdated">Updated 2m ago</div>
                     </div>
                 </div>
-
-                <button class="btn btn-primary" onclick="makePrediction()">Get Prediction (1 Credit)</button>
-
-                <div id="predictionResult" style="display: none;">
-                    <div class="chart-container">
-                        <canvas id="priceChart"></canvas>
+                
+                <div class="chart-container">
+                    <div class="chart-grid"></div>
+                    <div class="price-chart">
+                        <div class="chart-line"></div>
                     </div>
-
-                    <div class="prediction-result">
-                        <div class="prediction-price" id="predictedPrice">$2.78</div>
-                        <div class="prediction-change" id="predictedChange">+13.47% ↗</div>
-                        <div class="accuracy-badge">87% Historical Prediction Accuracy</div>
+                </div>
+                
+                <div class="market-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">$2.1M</div>
+                        <div class="stat-label">24h Volume</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">$0.0195</div>
+                        <div class="stat-label">24h Low</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">$0.0224</div>
+                        <div class="stat-label">24h High</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Referral Tab -->
-            <div id="referralTab" class="tab-content" style="display: none;">
-                <div class="referral-section">
-                    <h3 style="text-align: center; margin-bottom: 15px;">Your Referral Code</h3>
-                    <div class="referral-code" id="userReferralCode">REF789123</div>
-                    <button class="btn btn-secondary" onclick="shareReferral()">Share Code</button>
-                    <div style="text-align: center; margin-top: 15px; font-size: 14px; color: rgba(255, 255, 255, 0.7);">
-                        Each friend who joins gives you <strong>+5 credits</strong>
-                    </div>
-                </div>
+            <div class="credits-display">
+                <div>Available Credits</div>
+                <div class="credits-number" id="creditsCount">10</div>
+            </div>
 
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value">3</div>
-                        <div class="stat-label">Referrals</div>
+            <div class="holdings-status" id="holdingsStatus">
+                <div>
+                    <strong>PARAX Holdings</strong>
+                    <div style="font-size: 0.8rem; opacity: 0.7;">Required for referral rewards</div>
+                </div>
+                <div class="holdings-unverified">
+                    ⚠️ Not Verified
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🔮 Request Prediction</h3>
+                <div id="predictionOptions">
+                    <div class="prediction-option" onclick="requestPrediction('1h')">
+                        <div class="prediction-info">
+                            <h3>Next Hour</h3>
+                            <p>Short-term price movement</p>
+                            <div class="user-demand">
+                                <span class="demand-indicator">🔥 127 users</span>
+                                <span style="font-size: 0.7rem; opacity: 0.6;">requested today</span>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="prediction-cost">1 Credit</div>
+                            <div class="accuracy-trend">
+                                <span style="font-size: 0.7rem;">91% accuracy</span>
+                                <span class="trend-arrow trend-up">↗️</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-value">+15</div>
-                        <div class="stat-label">Bonus Credits</div>
+                    
+                    <div class="prediction-option" onclick="requestPrediction('24h')">
+                        <div class="prediction-info">
+                            <h3>Next 24 Hours <span class="accuracy-badge">Most Popular</span></h3>
+                            <p>Daily price prediction</p>
+                            <div class="user-demand">
+                                <span class="demand-indicator">🚀 342 users</span>
+                                <span style="font-size: 0.7rem; opacity: 0.6;">requested today</span>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="prediction-cost">1 Credit</div>
+                            <div class="accuracy-trend">
+                                <span style="font-size: 0.7rem;">94% accuracy</span>
+                                <span class="trend-arrow trend-up">↗️</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="prediction-option" onclick="requestPrediction('1w')">
+                        <div class="prediction-info">
+                            <h3>Next Week</h3>
+                            <p>Weekly trend analysis</p>
+                            <div class="user-demand">
+                                <span class="demand-indicator">📈 89 users</span>
+                                <span style="font-size: 0.7rem; opacity: 0.6;">requested today</span>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="prediction-cost">1 Credit</div>
+                            <div class="accuracy-trend">
+                                <span style="font-size: 0.7rem;">89% accuracy</span>
+                                <span class="trend-arrow trend-stable">→</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="prediction-option" onclick="requestPrediction('1m')">
+                        <div class="prediction-info">
+                            <h3>Next Month</h3>
+                            <p>Monthly market outlook</p>
+                            <div class="user-demand">
+                                <span class="demand-indicator">💎 156 users</span>
+                                <span style="font-size: 0.7rem; opacity: 0.6;">requested today</span>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="prediction-cost">1 Credit</div>
+                            <div class="accuracy-trend">
+                                <span style="font-size: 0.7rem;">85% accuracy</span>
+                                <span class="trend-arrow trend-up">↗️</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="prediction-option" onclick="requestPrediction('1y')">
+                        <div class="prediction-info">
+                            <h3>Next Year</h3>
+                            <p>Long-term projection</p>
+                            <div class="user-demand">
+                                <span class="demand-indicator">⭐ 67 users</span>
+                                <span style="font-size: 0.7rem; opacity: 0.6;">requested today</span>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="prediction-cost">1 Credit</div>
+                            <div class="accuracy-trend">
+                                <span style="font-size: 0.7rem;">78% accuracy</span>
+                                <span class="trend-arrow trend-down">↘️</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Loading Screen -->
-        <div id="loadingScreen" class="screen">
-            <div class="loading">
-                <div class="spinner"></div>
-                <div>Analyzing market data...</div>
+        <!-- Prediction Result Screen -->
+        <div class="screen" id="prediction-screen">
+            <div class="header">
+                <div class="logo">📊 Pricium</div>
+                <div class="subtitle">Prediction Result</div>
             </div>
+
+            <div class="card">
+                <div class="prediction-result">
+                    <h3 id="predictionTimeframe">Next 24 Hours</h3>
+                    <div class="prediction-price" id="predictedPrice">$0.0245</div>
+                    <div class="prediction-change positive" id="priceChange">+12.5% ↗️</div>
+                    <p style="opacity: 0.7; margin-top: 15px;">Confidence: <strong>94%</strong></p>
+                    <p style="opacity: 0.7; font-size: 0.8rem; margin-top: 10px;">
+                        Prediction generated using advanced AI analysis of market trends, technical indicators, and trading patterns.
+                    </p>
+                </div>
+                <button class="btn btn-primary" onclick="showScreen('dashboard-screen')">Get Another Prediction</button>
+                <button class="btn btn-secondary" onclick="shareResult()">Share Result</button>
+            </div>
+
+            <div class="card">
+                <h3>📈 Market Analysis</h3>
+                <p style="opacity: 0.8; line-height: 1.5;">
+                    Strong bullish signals detected with increased trading volume and positive social sentiment. 
+                    Technical indicators suggest continued upward momentum in the short term.
+                </p>
+            </div>
+        </div>
+
+        <!-- Referral Screen -->
+        <div class="screen" id="referral-screen">
+            <div class="header">
+                <div class="logo">👥 Referrals</div>
+                <div class="subtitle">Earn Credits by Inviting Friends</div>
+            </div>
+
+            <div class="card">
+                <div class="referral-section">
+                    <h3>🎁 Your Referral Code</h3>
+                    <div class="referral-code-display" id="userReferralCode">PX7K9M</div>
+                    <button class="btn btn-primary" onclick="copyReferralCode()">Copy & Share</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>💰 Earn Credits</h3>
+                <p style="margin-bottom: 15px; opacity: 0.8;">
+                    Get <strong>1 credit</strong> for each friend who joins with your code (they must hold 10k+ PARAX)
+                </p>
+                <div style="background: rgba(255, 215, 0, 0.1); border-radius: 8px; padding: 12px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Successful Referrals:</span>
+                        <strong id="referralCount">3</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                        <span>Credits Earned:</span>
+                        <strong id="creditsEarned">3</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📋 How It Works</h3>
+                <div style="text-align: left; opacity: 0.8; line-height: 1.6;">
+                    <p>1. Share your referral code with friends</p>
+                    <p>2. They join Pricium using your code</p>
+                    <p>3. Once they verify 10k+ PARAX holdings, you earn 1 credit</p>
+                    <p>4. Use credits for more predictions!</p>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" onclick="verifyHoldings()">Verify My PARAX Holdings</button>
+        </div>
+
+        <!-- History Screen -->
+        <div class="screen" id="history-screen">
+            <div class="header">
+                <div class="logo">📊 History</div>
+                <div class="subtitle">Your Prediction History</div>
+            </div>
+
+            <div class="card">
+                <h3>Recent Predictions</h3>
+                <div class="prediction-history">
+                    <div class="prediction-item">
+                        <div>
+                            <strong>24h Prediction</strong>
+                            <div style="font-size: 0.8rem; opacity: 0.7;">2 hours ago</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="positive">+12.5%</div>
+                            <div style="font-size: 0.8rem;">✅ Accurate</div>
+                        </div>
+                    </div>
+                    
+                    <div class="prediction-item">
+                        <div>
+                            <strong>1h Prediction</strong>
+                            <div style="font-size: 0.8rem; opacity: 0.7;">6 hours ago</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="positive">+3.2%</div>
+                            <div style="font-size: 0.8rem;">✅ Accurate</div>
+                        </div>
+                    </div>
+                    
+                    <div class="prediction-item">
+                        <div>
+                            <strong>Weekly Prediction</strong>
+                            <div style="font-size: 0.8rem; opacity: 0.7;">1 day ago</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="positive">+18.7%</div>
+                            <div style="font-size: 0.8rem;">⏳ Pending</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📈 Your Stats</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: center;">
+                    <div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #FFD700;">7</div>
+                        <div style="font-size: 0.8rem; opacity: 0.7;">Total Predictions</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #4CAF50;">92%</div>
+                        <div style="font-size: 0.8rem; opacity: 0.7;">Accuracy Rate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <button class="nav-btn active" onclick="showScreen('dashboard-screen')">
+                <div class="nav-icon">🏠</div>
+                <div>Home</div>
+            </button>
+            <button class="nav-btn" onclick="showScreen('referral-screen')">
+                <div class="nav-icon">👥</div>
+                <div>Referrals</div>
+            </button>
+            <button class="nav-btn" onclick="showScreen('history-screen')">
+                <div class="nav-icon">📊</div>
+                <div>History</div>
+            </button>
         </div>
     </div>
 
     <script>
+        // App state
         let userCredits = 10;
-        let currentTimeframe = '1h';
-        let priceChart = null;
+        let userReferrals = 3;
+        let creditsEarned = 3;
+        let isParaxHolder = false;
+        let userReferralCode = 'PX7K9M';
+        let currentPrice = 0.0218;
+        let priceChange24h = 8.4;
 
-        // Mock data for demonstration
-        const historicalPrices = [2.10, 2.15, 2.08, 2.22, 2.18, 2.35, 2.41, 2.45];
-        const currentPrice = 2.45;
+        // User demand data (simulated)
+        let userDemand = {
+            '1h': 127,
+            '24h': 342,
+            '1w': 89,
+            '1m': 156,
+            '1y': 67
+        };
 
-        function validateReferral() {
-            const referralCode = document.getElementById('referralInput').value.trim();
-            const errorDiv = document.getElementById('referralError');
-            
-            // Simple validation - in real app, this would be server-side
-            if (referralCode.length >= 6 && referralCode.toUpperCase().startsWith('REF')) {
-                showScreen('mainScreen');
-                errorDiv.style.display = 'none';
-            } else {
-                errorDiv.style.display = 'block';
-            }
+        // Initialize app
+        function initApp() {
+            updateCreditsDisplay();
+            updateHoldingsStatus();
+            updateReferralStats();
+            updatePriceDisplay();
+            simulateMarketData();
         }
 
+        // Update price display
+        function updatePriceDisplay() {
+            document.getElementById('currentPrice').textContent = `${currentPrice.toFixed(4)}`;
+            
+            const changeElement = document.getElementById('priceChange24h');
+            const changeText = `${priceChange24h >= 0 ? '+' : ''}${priceChange24h.toFixed(1)}% (24h)`;
+            changeElement.textContent = changeText;
+            changeElement.className = `price-change-24h ${priceChange24h >= 0 ? 'positive' : 'negative'}`;
+            
+            // Update last updated time
+            const now = new Date();
+            const minutes = Math.floor(Math.random() * 5) + 1;
+            document.getElementById('lastUpdated').textContent = `Updated ${minutes}m ago`;
+        }
+
+        // Simulate real-time market data updates
+        function simulateMarketData() {
+            setInterval(() => {
+                // Simulate small price movements
+                const change = (Math.random() - 0.5) * 0.0004; // Small random change
+                currentPrice += change;
+                currentPrice = Math.max(0.0001, currentPrice); // Prevent negative prices
+                
+                // Update 24h change
+                priceChange24h += (Math.random() - 0.5) * 0.5;
+                priceChange24h = Math.max(-50, Math.min(50, priceChange24h)); // Keep within reasonable bounds
+                
+                updatePriceDisplay();
+                
+                // Occasionally update user demand numbers
+                if (Math.random() > 0.8) {
+                    updateUserDemand();
+                }
+            }, 5000); // Update every 5 seconds
+        }
+
+        // Update user demand numbers
+        function updateUserDemand() {
+            Object.keys(userDemand).forEach(timeframe => {
+                // Small random changes to user demand
+                const change = Math.floor((Math.random() - 0.5) * 10);
+                userDemand[timeframe] = Math.max(1, userDemand[timeframe] + change);
+            });
+            
+            // Update DOM elements
+            const demandElements = document.querySelectorAll('.demand-indicator');
+            const timeframes = ['1h', '24h', '1w', '1m', '1y'];
+            const icons = ['🔥', '🚀', '📈', '💎', '⭐'];
+            
+            demandElements.forEach((element, index) => {
+                const timeframe = timeframes[index];
+                const icon = icons[index];
+                element.textContent = `${icon} ${userDemand[timeframe]} users`;
+            });
+        }
+
+        // Screen navigation
         function showScreen(screenId) {
+            // Hide all screens
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.classList.remove('active');
             });
+            
+            // Show target screen
             document.getElementById(screenId).classList.add('active');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            
+            // Highlight active nav button
+            if (screenId === 'dashboard-screen') {
+                document.querySelector('.nav-btn').classList.add('active');
+            } else if (screenId === 'referral-screen') {
+                document.querySelectorAll('.nav-btn')[1].classList.add('active');
+            } else if (screenId === 'history-screen') {
+                document.querySelectorAll('.nav-btn')[2].classList.add('active');
+            }
         }
 
-        function showTab(tabName) {
-            // Update nav tabs
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            // Show tab content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.style.display = 'none';
-            });
-            document.getElementById(tabName + 'Tab').style.display = 'block';
-        }
-
-        function selectTimeframe(button, timeframe) {
-            document.querySelectorAll('.timeframe-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            button.classList.add('active');
-            currentTimeframe = timeframe;
-        }
-
-        function makePrediction() {
-            if (userCredits <= 0) {
-                alert('No credits remaining! Invite friends to get more.');
+        // Join with referral code
+        function joinWithReferral() {
+            const referralCode = document.getElementById('referralInput').value.trim();
+            
+            if (!referralCode) {
+                alert('Please enter a referral code to continue');
                 return;
             }
+            
+            // Simulate referral validation
+            if (referralCode.length < 5) {
+                alert('Invalid referral code. Please check and try again.');
+                return;
+            }
+            
+            // Welcome user and show dashboard
+            showScreen('dashboard-screen');
+            
+            // Show welcome message
+            setTimeout(() => {
+                alert('🎉 Welcome to Pricium! You\'ve received 10 free credits to start predicting!');
+            }, 500);
+        }
 
-            showScreen('loadingScreen');
+        // Request prediction
+        function requestPrediction(timeframe) {
+            if (userCredits <= 0) {
+                alert('⚠️ You need credits to request predictions! Invite friends to earn more credits.');
+                showScreen('referral-screen');
+                return;
+            }
+            
+            // Deduct credit
+            userCredits--;
+            updateCreditsDisplay();
+            
+            // Generate mock prediction
+            const predictions = {
+                '1h': { price: '$0.0219', change: '+2.3%', confidence: '91%' },
+                '24h': { price: '$0.0245', change: '+12.5%', confidence: '94%' },
+                '1w': { price: '$0.0267', change: '+22.1%', confidence: '89%' },
+                '1m': { price: '$0.0298', change: '+36.4%', confidence: '85%' },
+                '1y': { price: '$0.0421', change: '+92.7%', confidence: '78%' }
+            };
+            
+            const timeframeNames = {
+                '1h': 'Next Hour',
+                '24h': 'Next 24 Hours', 
+                '1w': 'Next Week',
+                '1m': 'Next Month',
+                '1y': 'Next Year'
+            };
+            
+            const prediction = predictions[timeframe];
+            
+            // Update prediction display
+            document.getElementById('predictionTimeframe').textContent = timeframeNames[timeframe];
+            document.getElementById('predictedPrice').textContent = prediction.price;
+            document.getElementById('priceChange').textContent = prediction.change + ' ↗️';
+            document.getElementById('priceChange').className = 'prediction-change positive';
+            
+            // Show prediction screen
+            showScreen('prediction-screen');
+        }
+
+        // Copy referral code
+        function copyReferralCode() {
+            navigator.clipboard.writeText(userReferralCode).then(() => {
+                alert('📋 Referral code copied! Share it with your friends to earn credits.');
+            }).catch(() => {
+                // Fallback for browsers that don't support clipboard API
+                const textArea = document.createElement('textarea');
+                textArea.value = userReferralCode;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('📋 Referral code copied! Share it with your friends to earn credits.');
+            });
+        }
+
+        // Share prediction result
+        function shareResult() {
+            const text = `🚀 Just got a PARAX prediction from Pricium! Check out this AI-powered crypto prediction app. Use my referral code: ${userReferralCode}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Pricium - PARAX Predictions',
+                    text: text
+                });
+            } else {
+                navigator.clipboard.writeText(text);
+                alert('📋 Share text copied to clipboard!');
+            }
+        }
+
+        // Verify PARAX holdings
+        function verifyHoldings() {
+            // Simulate verification process
+            alert('🔍 Connecting to blockchain to verify your PARAX holdings...');
             
             setTimeout(() => {
-                userCredits--;
-                document.getElementById('creditsCount').textContent = userCredits;
+                // Simulate random verification result
+                const verified = Math.random() > 0.3; // 70% chance of verification
                 
-                // Generate prediction based on timeframe
-                const predictions = {
-                    '1h': { price: 2.52, change: 2.86 },
-                    '1d': { price: 2.78, change: 13.47 },
-                    '1w': { price: 3.12, change: 27.35 },
-                    '1m': { price: 2.89, change: 17.96 }
-                };
-                
-                const prediction = predictions[currentTimeframe];
-                const isPositive = prediction.change > 0;
-                
-                document.getElementById('predictedPrice').textContent = `$${prediction.price.toFixed(2)}`;
-                document.getElementById('predictedChange').textContent = 
-                    `${isPositive ? '+' : ''}${prediction.change.toFixed(2)}% ${isPositive ? '↗' : '↘'}`;
-                document.getElementById('predictedChange').className = 
-                    `prediction-change ${isPositive ? 'positive' : 'negative'}`;
-                
-                document.getElementById('predictionResult').style.display = 'block';
-                
-                createPriceChart(prediction.price);
-                showScreen('mainScreen');
+                if (verified) {
+                    isParaxHolder = true;
+                    updateHoldingsStatus();
+                    alert('✅ Holdings verified! You hold 15,420 PARAX tokens. You can now earn credits through referrals!');
+                } else {
+                    alert('❌ Could not verify 10k+ PARAX holdings. Make sure you have at least 10,000 PARAX tokens in your wallet.');
+                }
             }, 2000);
         }
 
-        function createPriceChart(targetPrice) {
-            const ctx = document.getElementById('priceChart').getContext('2d');
+        // Update credits display
+        function updateCreditsDisplay() {
+            document.getElementById('creditsCount').textContent = userCredits;
             
-            if (priceChart) {
-                priceChart.destroy();
-            }
-
-            const labels = ['7d ago', '6d ago', '5d ago', '4d ago', '3d ago', '2d ago', '1d ago', 'Now', 'Target'];
-            const historicalData = [...historicalPrices, targetPrice];
-            
-            priceChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Historical Price',
-                        data: historicalPrices.concat([currentPrice]),
-                        borderColor: '#00ff88',
-                        backgroundColor: 'rgba(0, 255, 136, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        pointBackgroundColor: '#00ff88',
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 2,
-                        pointRadius: 5
-                    }, {
-                        label: 'Prediction',
-                        data: new Array(historicalPrices.length).fill(null).concat([currentPrice, targetPrice]),
-                        borderColor: '#ff0080',
-                        backgroundColor: 'transparent',
-                        borderWidth: 3,
-                        borderDash: [10, 5],
-                        pointBackgroundColor: '#ff0080',
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 2,
-                        pointRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: 'white',
-                                usePointStyle: true
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            ticks: { color: 'rgba(255, 255, 255, 0.8)' },
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                        },
-                        y: {
-                            ticks: { 
-                                color: 'rgba(255, 255, 255, 0.8)',
-                                callback: function(value) {
-                                    return '$' + value.toFixed(2);
-                                }
-                            },
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                        }
-                    },
-                    elements: {
-                        point: {
-                            hoverRadius: 8
-                        }
-                    }
+            // Update prediction options based on available credits
+            const options = document.querySelectorAll('.prediction-option');
+            options.forEach(option => {
+                if (userCredits <= 0) {
+                    option.classList.add('disabled');
+                    option.style.pointerEvents = 'none';
+                } else {
+                    option.classList.remove('disabled');
+                    option.style.pointerEvents = 'auto';
                 }
             });
         }
 
-        function shareReferral() {
-            const referralCode = document.getElementById('userReferralCode').textContent;
-            const shareText = `Join me on AI Powered Price Predicting Agent for PARAX price predictions! Use my referral code: ${referralCode}`;
+        // Update holdings status
+        function updateHoldingsStatus() {
+            const statusElement = document.getElementById('holdingsStatus');
+            const statusDiv = statusElement.querySelector('div:last-child');
             
-            // Use Telegram WebApp API if available, otherwise fallback to clipboard
-            if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.sendData(JSON.stringify({
-                    action: 'share_referral',
-                    code: referralCode,
-                    text: shareText
-                }));
+            if (isParaxHolder) {
+                statusDiv.innerHTML = '✅ Verified (15.4k PARAX)';
+                statusDiv.className = 'holdings-verified';
             } else {
-                // Fallback to clipboard copy
-                navigator.clipboard.writeText(shareText).then(() => {
-                    alert('Referral code copied to clipboard!');
-                }).catch(() => {
-                    alert(`Share this code: ${referralCode}`);
-                });
+                statusDiv.innerHTML = '⚠️ Not Verified';
+                statusDiv.className = 'holdings-unverified';
             }
         }
 
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', function() {
-            // Auto-focus referral input
-            document.getElementById('referralInput').focus();
-            
-            // Allow Enter key to submit referral
-            document.getElementById('referralInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    validateReferral();
+        // Update referral stats
+        function updateReferralStats() {
+            document.getElementById('referralCount').textContent = userReferrals;
+            document.getElementById('creditsEarned').textContent = creditsEarned;
+            document.getElementById('userReferralCode').textContent = userReferralCode;
+        }
+
+        // Simulate periodic credit updates from referrals
+        function simulateReferralRewards() {
+            setInterval(() => {
+                if (isParaxHolder && Math.random() > 0.95) { // 5% chance every interval
+                    userReferrals++;
+                    creditsEarned++;
+                    userCredits++;
+                    updateCreditsDisplay();
+                    updateReferralStats();
+                    
+                    // Show notification
+                    alert('🎉 New referral! You earned 1 credit. Keep sharing!');
                 }
-            });
+            }, 30000); // Check every 30 seconds
+        }
+
+        // Initialize app when page loads
+        window.addEventListener('load', () => {
+            initApp();
+            simulateReferralRewards();
         });
+
+        // Handle Telegram WebApp specific features
+        if (window.Telegram && window.Telegram.WebApp) {
+            const tg = window.Telegram.WebApp;
+            tg.ready();
+            tg.expand();
+            
+            // Set theme colors to match dark theme
+            tg.setHeaderColor('#0f0f23');
+            tg.setBackgroundColor('#0f0f23');
+        }
     </script>
 </body>
 </html>
