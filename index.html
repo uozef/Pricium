@@ -571,15 +571,7 @@
                 <div class="credits-number" id="creditsCount">10</div>
             </div>
 
-            <div class="holdings-status" id="holdingsStatus">
-                <div>
-                    <strong>PARAX Holdings</strong>
-                    <div style="font-size: 0.8rem; opacity: 0.7;">Required for referral rewards</div>
-                </div>
-                <div class="holdings-unverified">
-                    ⚠️ Not Verified
-                </div>
-            </div>
+
 
             <div class="card">
                 <h3>🔮 Request Prediction</h3>
@@ -748,8 +740,6 @@
                     <p>4. Use credits for more predictions!</p>
                 </div>
             </div>
-
-            <button class="btn btn-secondary" onclick="verifyHoldings()">Verify My PARAX Holdings</button>
         </div>
 
         <!-- History Screen -->
@@ -834,7 +824,6 @@
         let userCredits = 10;
         let userReferrals = 3;
         let creditsEarned = 3;
-        let isParaxHolder = false;
         let userReferralCode = 'PX7K9M';
         let currentPrice = 0.0218;
         let priceChange24h = 8.4;
@@ -851,7 +840,6 @@
         // Initialize app
         function initApp() {
             updateCreditsDisplay();
-            updateHoldingsStatus();
             updateReferralStats();
             updatePriceDisplay();
             simulateMarketData();
@@ -1032,25 +1020,6 @@
             }
         }
 
-        // Verify PARAX holdings
-        function verifyHoldings() {
-            // Simulate verification process
-            alert('🔍 Connecting to blockchain to verify your PARAX holdings...');
-            
-            setTimeout(() => {
-                // Simulate random verification result
-                const verified = Math.random() > 0.3; // 70% chance of verification
-                
-                if (verified) {
-                    isParaxHolder = true;
-                    updateHoldingsStatus();
-                    alert('✅ Holdings verified! You hold 15,420 PARAX tokens. You can now earn credits through referrals!');
-                } else {
-                    alert('❌ Could not verify 10k+ PARAX holdings. Make sure you have at least 10,000 PARAX tokens in your wallet.');
-                }
-            }, 2000);
-        }
-
         // Update credits display
         function updateCreditsDisplay() {
             document.getElementById('creditsCount').textContent = userCredits;
@@ -1068,20 +1037,6 @@
             });
         }
 
-        // Update holdings status
-        function updateHoldingsStatus() {
-            const statusElement = document.getElementById('holdingsStatus');
-            const statusDiv = statusElement.querySelector('div:last-child');
-            
-            if (isParaxHolder) {
-                statusDiv.innerHTML = '✅ Verified (15.4k PARAX)';
-                statusDiv.className = 'holdings-verified';
-            } else {
-                statusDiv.innerHTML = '⚠️ Not Verified';
-                statusDiv.className = 'holdings-unverified';
-            }
-        }
-
         // Update referral stats
         function updateReferralStats() {
             document.getElementById('referralCount').textContent = userReferrals;
@@ -1092,7 +1047,7 @@
         // Simulate periodic credit updates from referrals
         function simulateReferralRewards() {
             setInterval(() => {
-                if (isParaxHolder && Math.random() > 0.95) { // 5% chance every interval
+                if (Math.random() > 0.95) { // 5% chance every interval
                     userReferrals++;
                     creditsEarned++;
                     userCredits++;
